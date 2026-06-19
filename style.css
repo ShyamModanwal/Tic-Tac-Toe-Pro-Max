@@ -1,529 +1,346 @@
-  let p1, p2;
-let current = 'X';
-let board = ['', '', '', '', '', '', '', '', ''];
-let active = true;
-
-let gameMode = "pvp";
-
-let scoreX = Number(localStorage.getItem('scoreX')) || 0;
-let scoreO = Number(localStorage.getItem('scoreO')) || 0;
-let draws = Number(localStorage.getItem('draws')) || 0;
-
-let totalGames =
-Number(localStorage.getItem('totalGames')) || 0;
-
-let totalWins =
-Number(localStorage.getItem('totalWins')) || 0;
-
-let totalLosses =
-Number(localStorage.getItem('totalLosses')) || 0;
-
-const wins = [
-[0,1,2],[3,4,5],[6,7,8],
-[0,3,6],[1,4,7],[2,5,8],
-[0,4,8],[2,4,6]
-];
-
-function startGame(){
-
-    p1 =
-    document.getElementById('p1').value
-    || "Player 1";
-
-    p2 =
-    document.getElementById('p2').value
-    || "Player 2";
-
-    gameMode =
-    document.getElementById('gameMode').value;
-
-    if(gameMode === "bot"){
-        p2 = "🤖 Smart Bot";
-    }
-
-    document
-    .getElementById('setup')
-    .classList.add('hidden');
-
-    document
-    .getElementById('game')
-    .classList.remove('hidden');
-
-    updateScores();
-    updateStats();
-    renderHistory();
-    checkTrophies();
-
-    createBoard();
+  *{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
 }
 
-function createBoard(){
-
-    const boardDiv =
-    document.getElementById('board');
-
-    boardDiv.innerHTML = '';
-
-    board =
-    ['','','','','','','','',''];
-
-    active = true;
-
-    current = 'X';
-
-    for(let i=0;i<9;i++){
-
-        let cell =
-        document.createElement('div');
-
-        cell.className = 'cell';
-
-        cell.dataset.i = i;
-
-        cell.addEventListener(
-        'click',
-        move
-        );
-
-        boardDiv.appendChild(cell);
-    }
-
-    updateStatus();
+body{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(
+-45deg,
+#0f2027,
+#203a43,
+#2c5364,
+#4e54c8
+);
+background-size:400% 400%;
+animation:bgAnimation 12s ease infinite;
+color:white;
+padding:20px;
 }
 
-function move(){
+@keyframes bgAnimation{
 
-    let index =
-    this.dataset.i;
-
-    if(
-        board[index] !== ''
-        || !active
-    ){
-        return;
-    }
-
-    board[index] = current;
-
-    this.textContent = current;
-
-    checkWinner();
-
-    if(!active) return;
-
-    if(
-        gameMode === "bot"
-        &&
-        current === "X"
-    ){
-
-        current = "O";
-
-        updateStatus();
-
-        setTimeout(botMove,500);
-
-        return;
-    }
-
-    current =
-    current === "X"
-    ? "O"
-    : "X";
-
-    updateStatus();
+0%{
+background-position:0% 50%;
 }
 
-function botMove(){
-
-    let moveIndex = findBestMove();
-
-    board[moveIndex] = "O";
-
-    document
-    .querySelectorAll('.cell')
-    [moveIndex]
-    .textContent = "O";
-
-    checkWinner();
-
-    if(active){
-
-        current = "X";
-
-        updateStatus();
-    }
+50%{
+background-position:100% 50%;
 }
 
-function findBestMove(){
-
-    for(let combo of wins){
-
-        let [a,b,c] = combo;
-
-        let line =
-        [board[a],board[b],board[c]];
-
-        if(
-            line.filter(x=>x==="O").length===2
-            &&
-            line.includes("")
-        ){
-
-            if(board[a]==="") return a;
-            if(board[b]==="") return b;
-            if(board[c]==="") return c;
-        }
-    }
-
-    for(let combo of wins){
-
-        let [a,b,c] = combo;
-
-        let line =
-        [board[a],board[b],board[c]];
-
-        if(
-            line.filter(x=>x==="X").length===2
-            &&
-            line.includes("")
-        ){
-
-            if(board[a]==="") return a;
-            if(board[b]==="") return b;
-            if(board[c]==="") return c;
-        }
-    }
-
-    if(board[4] === ""){
-        return 4;
-    }
-
-    let empty = [];
-
-    board.forEach((v,i)=>{
-
-        if(v===""){
-            empty.push(i);
-        }
-    });
-
-    return empty[
-        Math.floor(
-        Math.random()*empty.length
-        )
-    ];
+100%{
+background-position:0% 50%;
 }
 
-function checkWinner(){
-
-    for(let combo of wins){
-
-        let [a,b,c] = combo;
-
-        if(
-            board[a]
-            &&
-            board[a]===board[b]
-            &&
-            board[a]===board[c]
-        ){
-
-            active = false;
-
-            const cells =
-            document.querySelectorAll('.cell');
-
-            cells[a].classList.add('win');
-            cells[b].classList.add('win');
-            cells[c].classList.add('win');
-
-            let winnerName;
-
-            if(current==="X"){
-
-                scoreX += 10;
-
-                totalWins++;
-
-                winnerName = p1;
-
-            }else{
-
-                scoreO += 10;
-
-                totalLosses++;
-
-                winnerName = p2;
-            }
-
-            totalGames++;
-
-            saveData();
-
-            updateScores();
-
-            updateStats();
-
-            checkTrophies();
-
-            addHistory(
-            `${winnerName} won`
-            );
-
-            document
-            .getElementById('status')
-            .textContent =
-            `🏆 ${winnerName} Wins!`;
-
-            confettiEffect();
-
-            return;
-        }
-    }
-
-    if(!board.includes("")){
-
-        active = false;
-
-        draws++;
-
-        totalGames++;
-
-        saveData();
-
-        updateScores();
-
-        updateStats();
-
-        addHistory("🤝 Draw Match");
-
-        document
-        .getElementById('status')
-        .textContent =
-        "🤝 Match Draw";
-    }
 }
 
-function updateStatus(){
-
-    let player =
-    current==="X"
-    ? p1
-    : p2;
-
-    document
-    .getElementById('status')
-    .textContent =
-    `${player}'s Turn (${current})`;
+.container{
+width:100%;
+max-width:1000px;
 }
 
-function updateScores(){
-
-    document
-    .getElementById('scoreX')
-    .textContent =
-    `${p1}: ${scoreX}`;
-
-    document
-    .getElementById('scoreO')
-    .textContent =
-    `${p2}: ${scoreO}`;
-
-    document
-    .getElementById('draws')
-    .textContent =
-    `Draws: ${draws}`;
+.logo{
+text-align:center;
+margin-bottom:25px;
 }
 
-function updateStats(){
-
-    document
-    .getElementById('totalGames')
-    .textContent =
-    totalGames;
-
-    document
-    .getElementById('wins')
-    .textContent =
-    totalWins;
-
-    document
-    .getElementById('losses')
-    .textContent =
-    totalLosses;
-
-    document
-    .getElementById('drawCount')
-    .textContent =
-    draws;
+.logo h1{
+font-size:2.5rem;
+text-shadow:
+0 0 10px cyan,
+0 0 20px cyan,
+0 0 40px cyan;
 }
 
-function saveData(){
-
-    localStorage.setItem(
-    'scoreX',
-    scoreX
-    );
-
-    localStorage.setItem(
-    'scoreO',
-    scoreO
-    );
-
-    localStorage.setItem(
-    'draws',
-    draws
-    );
-
-    localStorage.setItem(
-    'totalGames',
-    totalGames
-    );
-
-    localStorage.setItem(
-    'totalWins',
-    totalWins
-    );
-
-    localStorage.setItem(
-    'totalLosses',
-    totalLosses
-    );
+.logo p{
+margin-top:8px;
+opacity:.9;
 }
 
-function addHistory(text){
+.card,
+.topbar,
+.controls,
+.trophy-box,
+.stats,
+.history-box{
 
-    let history =
-    JSON.parse(
-    localStorage.getItem('history')
-    ) || [];
+background:rgba(255,255,255,.08);
 
-    history.unshift(text);
+backdrop-filter:blur(12px);
 
-    localStorage.setItem(
-    'history',
-    JSON.stringify(history)
-    );
+border:1px solid rgba(255,255,255,.1);
 
-    renderHistory();
+border-radius:20px;
+
+padding:20px;
+
+margin-bottom:20px;
 }
 
-function renderHistory(){
+input,
+select{
 
-    let history =
-    JSON.parse(
-    localStorage.getItem('history')
-    ) || [];
+width:100%;
 
-    let ul =
-    document.getElementById('history');
+padding:14px;
 
-    ul.innerHTML = '';
+margin:10px 0;
 
-    history.forEach(item=>{
+border:none;
 
-        let li =
-        document.createElement('li');
+border-radius:12px;
 
-        li.textContent = item;
+outline:none;
 
-        ul.appendChild(li);
-    });
+font-size:1rem;
 }
 
-function checkTrophies(){
+.neon-btn{
 
-    let trophy =
-    "No Trophy Yet";
+width:100%;
 
-    if(totalWins >= 50)
-    trophy = "👑 King Trophy";
+padding:14px;
 
-    else if(totalWins >= 20)
-    trophy = "🥇 Gold Trophy";
+margin-top:10px;
 
-    else if(totalWins >= 10)
-    trophy = "🥈 Silver Trophy";
+background:#111;
 
-    else if(totalWins >= 5)
-    trophy = "🥉 Bronze Trophy";
+color:#00ffff;
 
-    document
-    .getElementById('trophies')
-    .textContent =
-    trophy;
+border:2px solid #00ffff;
+
+border-radius:12px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.3s;
+
+box-shadow:
+0 0 10px #00ffff,
+0 0 20px #00ffff;
 }
 
-function resetRound(){
-    createBoard();
+.neon-btn:hover{
+
+transform:scale(1.03);
+
+box-shadow:
+0 0 20px #00ffff,
+0 0 40px #00ffff,
+0 0 60px #00ffff;
 }
 
-function newMatch(){
+.topbar{
 
-    if(confirm(
-    "Reset all progress?"
-    )){
+display:flex;
 
-        localStorage.clear();
+justify-content:space-between;
 
-        location.reload();
-    }
+align-items:center;
+
+font-weight:bold;
+
+text-align:center;
 }
 
-function toggleTheme(){
+.board{
 
-    document.body
-    .classList.toggle('dark');
+display:grid;
+
+grid-template-columns:repeat(3,120px);
+
+gap:12px;
+
+justify-content:center;
+
+margin:25px auto;
 }
 
-function confettiEffect(){
+.cell{
 
-    for(let i=0;i<50;i++){
+width:120px;
 
-        let confetti =
-        document.createElement('div');
+height:120px;
 
-        confetti.innerHTML = "🎉";
+background:white;
 
-        confetti.style.position =
-        "fixed";
+color:black;
 
-        confetti.style.left =
-        Math.random()*100 + "vw";
+display:flex;
 
-        confetti.style.top =
-        "-20px";
+justify-content:center;
 
-        confetti.style.fontSize =
-        "30px";
+align-items:center;
 
-        confetti.style.zIndex =
-        "9999";
+font-size:3rem;
 
-        document.body
-        .appendChild(confetti);
+font-weight:bold;
 
-        let pos = -20;
+border-radius:15px;
 
-        let fall =
-        setInterval(()=>{
+cursor:pointer;
 
-            pos += 8;
+transition:.3s;
+}
 
-            confetti.style.top =
-            pos + "px";
+.cell:hover{
 
-            if(
-            pos >
-            window.innerHeight
-            ){
+transform:scale(1.05);
+}
 
-                clearInterval(fall);
+.win{
 
-                confetti.remove();
-            }
+background:#7CFC00 !important;
 
-        },20);
-    }
+box-shadow:
+0 0 20px #7CFC00,
+0 0 40px #7CFC00,
+0 0 80px #7CFC00;
+}
+
+.controls{
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:10px;
+
+justify-content:center;
+}
+
+.controls .neon-btn{
+
+width:auto;
+
+padding:12px 18px;
+}
+
+#status{
+
+text-align:center;
+
+margin:15px 0;
+
+font-size:1.4rem;
+
+font-weight:bold;
+}
+
+.trophy-box h3,
+.stats h3,
+.history-box h3{
+
+margin-bottom:10px;
+
+color:#00ffff;
+}
+
+#trophies{
+
+font-size:1.1rem;
+
+font-weight:bold;
+}
+
+.stats p{
+
+margin:8px 0;
+}
+
+#history{
+
+padding-left:20px;
+}
+
+#history li{
+
+margin:8px 0;
+}
+
+.owner{
+
+position:fixed;
+
+right:10px;
+
+bottom:10px;
+
+background:rgba(0,0,0,.5);
+
+padding:10px 15px;
+
+border-radius:12px;
+
+font-size:.9rem;
+
+z-index:999;
+}
+
+.dark{
+
+background:#111 !important;
+}
+
+.hidden{
+display:none;
+}
+
+/* Mobile Responsive */
+
+@media(max-width:768px){
+
+.logo h1{
+font-size:1.8rem;
+}
+
+.board{
+
+grid-template-columns:repeat(3,90px);
+
+gap:8px;
+}
+
+.cell{
+
+width:90px;
+
+height:90px;
+
+font-size:2rem;
+}
+
+.topbar{
+
+flex-direction:column;
+
+gap:10px;
+}
+
+.controls{
+
+flex-direction:column;
+}
+
+.controls .neon-btn{
+
+width:100%;
+}
+
+.owner{
+
+font-size:.75rem;
+
+right:5px;
+
+bottom:5px;
+}
+
 }
