@@ -1,49 +1,160 @@
-<!DOCTYPE html>
-<html>
+ <!DOCTYPE html>
+<html lang="en">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Tic Tac Toe Pro Max</title>
+
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div class="owner">👑 Developed & Maintained by Shyam Modanwal</div>
+
+<div class="owner">
+    👑 Developed & Maintained by Shyam Modanwal
+</div>
 
 <div class="container">
-<div class="logo">
-<h1>🎮 TIC TAC TOE PRO MAX</h1>
-<p>Created by Shyam Modanwal</p>
-</div>
 
-<div id="setup" class="card">
-<h2>Start New Match</h2>
-<input id="p1" placeholder="Player 1 Name">
-<input id="p2" placeholder="Player 2 Name">
-<button onclick="startGame()">Start Game</button>
-</div>
+    <div class="logo">
+        <h1>🎮 TIC TAC TOE PRO MAX</h1>
+        <p>Play Against Friends or Smart AI</p>
+    </div>
 
-<div id="game" class="hidden">
-<div class="topbar">
-<div id="scoreX">Player 1: 0</div>
-<div id="draws">Draws: 0</div>
-<div id="scoreO">Player 2: 0</div>
-</div>
+    <!-- Setup Screen -->
+    <div id="setup" class="card">
 
-<h2 id="status"></h2>
+        <h2>Start New Match</h2>
 
-<div class="board" id="board"></div>
+        <input
+            type="text"
+            id="p1"
+            placeholder="Player Name"
+        >
 
-<div class="controls">
-<button onclick="resetRound()">Restart Round</button>
-<button onclick="newMatch()">New Match</button>
-<button onclick="toggleTheme()">🌙 Theme</button>
-</div>
+        <input
+            type="text"
+            id="p2"
+            placeholder="Second Player Name"
+        >
 
-<h3>Match History</h3>
-<ul id="history"></ul>
-</div>
+        <select id="gameMode">
+            <option value="pvp">
+                👥 Player vs Player
+            </option>
+
+            <option value="bot">
+                🤖 Player vs Smart Bot
+            </option>
+        </select>
+
+        <button class="neon-btn"
+            onclick="startGame()">
+            🚀 Start Game
+        </button>
+
+    </div>
+
+    <!-- Main Game -->
+    <div id="game" class="hidden">
+
+        <!-- Scoreboard -->
+        <div class="topbar">
+
+            <div id="scoreX">
+                Player 1 : 0
+            </div>
+
+            <div id="draws">
+                Draws : 0
+            </div>
+
+            <div id="scoreO">
+                Player 2 : 0
+            </div>
+
+        </div>
+
+        <!-- Status -->
+        <h2 id="status"></h2>
+
+        <!-- Game Board -->
+        <div id="board" class="board"></div>
+
+        <!-- Controls -->
+        <div class="controls">
+
+            <button class="neon-btn"
+                onclick="resetRound()">
+                🔄 Restart Round
+            </button>
+
+            <button class="neon-btn"
+                onclick="newMatch()">
+                🆕 New Match
+            </button>
+
+            <button class="neon-btn"
+                onclick="toggleTheme()">
+                🌙 Theme
+            </button>
+
+        </div>
+
+        <!-- Trophy Section -->
+        <div class="trophy-box">
+
+            <h3>🏆 Achievements</h3>
+
+            <div id="trophies">
+                No Trophy Yet
+            </div>
+
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats">
+
+            <h3>📊 Statistics</h3>
+
+            <p>
+                Total Games :
+                <span id="totalGames">0</span>
+            </p>
+
+            <p>
+                Wins :
+                <span id="wins">0</span>
+            </p>
+
+            <p>
+                Losses :
+                <span id="losses">0</span>
+            </p>
+
+            <p>
+                Draws :
+                <span id="drawCount">0</span>
+            </p>
+
+        </div>
+
+        <!-- Match History -->
+        <div class="history-box">
+
+            <h3>📜 Match History</h3>
+
+            <ul id="history"></ul>
+
+        </div>
+
+    </div>
+
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
